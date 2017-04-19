@@ -1,6 +1,6 @@
 import re
 from project_checker.checker.abstractservice import Service
-from branch import Branches
+from project_checker.checker.gitservice.branch import Branches
 
 
 class GitService(Service):
@@ -13,6 +13,15 @@ class GitService(Service):
 
     def pull(self):
         return self.command('pull')
+
+    def checkout(self, commit):
+        return self.command('checkout', commit)
+
+    def find_commit_before(self, branch, date):
+        matches = re.match('\d{4}-\d{2}-\d{2} \d{2}:\d{2}', date)
+        if not matches:
+            raise RuntimeError('invalid date format')
+        return self.command('rev-list', '-n', '1', '--before="' + date + '"', branch.name)
 
     def clone(self, repo_url):
         return self.command('clone', repo_url)

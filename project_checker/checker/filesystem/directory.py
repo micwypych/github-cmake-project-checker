@@ -1,5 +1,5 @@
 import os
-from report import Report
+from project_checker.checker.filesystem.report import Report
 
 
 class Directory:

@@ -1,0 +1,1 @@
+from project_checker.checker.project.studentproject import StudentProject

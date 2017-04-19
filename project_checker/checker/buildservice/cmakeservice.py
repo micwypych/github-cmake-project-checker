@@ -1,5 +1,5 @@
 from project_checker.checker.abstractservice import Service
-from makeservice import MakeService
+from project_checker.checker.buildservice.makeservice import MakeService
 
 
 class Target:

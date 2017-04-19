@@ -1,2 +1,2 @@
-from cmakeservice import Target
-from cmakeservice import CMakeService
+from project_checker.checker.buildservice.cmakeservice import Target
+from project_checker.checker.buildservice.cmakeservice import CMakeService

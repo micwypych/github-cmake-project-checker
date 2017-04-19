@@ -1,1 +1,1 @@
-from service import Service
+from project_checker.checker.abstractservice.service import Service
