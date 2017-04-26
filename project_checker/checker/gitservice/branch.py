@@ -1,3 +1,14 @@
+import re
+
+
+class CommitId:
+    def __init__(self, name):
+        self.name = name
+
+    def id(self):
+        return self.name
+
+
 class Branch:
     def __init__(self, name, git_service):
         self.name = name
@@ -11,8 +22,17 @@ class Branch:
 
 
 class LocalBranch(Branch):
-    def checkout(self):
-        return self.git_service.command('checkout', self.name)
+    def checkout(self, commit=None):
+        if commit is None:
+            return self.git_service.checkout_branch(self.name)
+        else:
+            return self.git_service.checkout_commit(commit)
+
+    def find_commit_before(self, date):
+        matches = re.match('\d{4}-\d{2}-\d{2} \d{2}:\d{2}', date)
+        if not matches:
+            raise RuntimeError('invalid date format')
+        return CommitId(self.git_service.command('rev-list', '-n', '1', '--before="' + date + '"', self.name).strip(' \t\n\r'))
 
     def __str__(self):
         return 'local:' + self.name

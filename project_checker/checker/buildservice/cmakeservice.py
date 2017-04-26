@@ -34,3 +34,8 @@ class CMakeService(Service):
         all_targets = self.list_all_targets()
         test_targets = filter(lambda t: t.name.endswith('tests') and not t.name.endswith('all_tests'), all_targets)
         return test_targets
+
+    def test_targets_without_compound_all_of_lab(self, lab):
+        all_targets = self.list_all_targets()
+        test_targets = filter(lambda t: t.name.endswith('tests') and t.name.startswith(lab) and not t.name.endswith('all_tests'), all_targets)
+        return test_targets

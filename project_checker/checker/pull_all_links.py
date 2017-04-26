@@ -5,13 +5,14 @@ from project_checker.checker.filesystem import Directory
 from project_checker.checker.filesystem import Report
 from project_checker.checker.gitservice import GitService
 from project_checker.checker.buildservice import CMakeService
+from project_checker.checker.project import StudentProject
 
 
 def new_main(args):
     working_dir = Directory()
     for line in open(args[0]):
         try:
-            process_single_project(line, working_dir)
+            process_single_project2(line, working_dir)
         except subprocess.CalledProcessError:
             continue
 
@@ -21,7 +22,7 @@ def process_single_project(line, working_dir):
     repository = line.strip(' \t\n\r')
     match = re.search('/([-\w]+)/([-\w]+)', repository)
     if match is None:
-        print (repository + ' does not match')
+        print(repository + ' does not match')
         raise RuntimeError('invalid repository ' + repository)
     user_dir_name = match.group(1)
     user_dir = working_dir.create_dir(user_dir_name)
@@ -60,9 +61,16 @@ def process_single_project(line, working_dir):
         report.load()
         final_report.merge(report)
     final_report.store()
-    print (final_report.report)
+    print(final_report.report)
     final_report.only_passed_tests('final-passed-report').store()
 
+
+def process_single_project2(line, working_dir):
+    working_dir.restore()
+    repository = line.strip(' \t\n\r')
+    project = StudentProject(repository, working_dir)
+    project.check_lab_to_date(['lab1', 'lab2', 'lab3'], ['2017-03-15 23:59', '2017-03-22 23:59', '2017-03-29 23:59'])
+    project.compile_final_report('report')
 
 if __name__ == "__main__":
     new_main(sys.argv[1:])
