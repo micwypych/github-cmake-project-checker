@@ -24,7 +24,7 @@ class DirectoryTest(TestCase):
         os.mkdir = self.mkdir
         os.path.isdir = self.isdir
 
-    def test_branches_creation_no_branches(self):
+    def test_finds_partial_report_declared_within_directory(self):
         os.listdir = lambda s: ['abc', 'efg', 'report-abc']
         os.path.abspath = lambda s: '/test'
         directory = Directory()

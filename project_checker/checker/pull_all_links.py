@@ -69,6 +69,7 @@ def process_single_project2(line, working_dir):
     working_dir.restore()
     repository = line.strip(' \t\n\r')
     project = StudentProject(repository, working_dir)
+    project.synchronize()
     project.check_lab_to_date(['lab1', 'lab2', 'lab3'], ['2017-03-15 23:59', '2017-03-22 23:59', '2017-03-29 23:59'])
     project.compile_final_report('report')
 

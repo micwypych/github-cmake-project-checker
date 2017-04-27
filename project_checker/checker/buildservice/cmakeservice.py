@@ -16,6 +16,11 @@ class Target:
     def report_result(self):
         return self.make_service.run(self.name)
 
+    def __str__(self):
+        return 'Target('+self.name+')'
+
+    __repr__ = __str__
+
 
 class CMakeService(Service):
     def __init__(self, verbose=False):
@@ -33,9 +38,9 @@ class CMakeService(Service):
     def test_targets_without_compound_all(self):
         all_targets = self.list_all_targets()
         test_targets = filter(lambda t: t.name.endswith('tests') and not t.name.endswith('all_tests'), all_targets)
-        return test_targets
+        return set(test_targets)
 
     def test_targets_without_compound_all_of_lab(self, lab):
         all_targets = self.list_all_targets()
-        test_targets = filter(lambda t: t.name.endswith('tests') and t.name.startswith(lab) and not t.name.endswith('all_tests'), all_targets)
-        return test_targets
+        test_targets = filter(lambda t: t.name.endswith('tests') and t.name.startswith(lab+'_') and not t.name.endswith('all_tests'), all_targets)
+        return set(test_targets)

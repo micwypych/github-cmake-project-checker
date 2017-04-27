@@ -80,7 +80,11 @@ class StudentProject:
         self.project_dir = self.user_dir.relative(project_dir_name)
         self.git = GitProject(self.project_dir, verbose=True)
         self.report_dir = self.project_dir.create_dir('report')
-        self.git.synchronize(self.user_dir, repository)
+        self.repository_name = repository
+        self.owners = []
+
+    def synchronize(self):
+        self.git.synchronize(self.user_dir, self.repository_name)
 
     def check_lab_to_date(self, labs, due_date):
         for lab, date in zip(labs, due_date):
@@ -105,3 +109,14 @@ class StudentProject:
         for report in all_reports:
             report.load()
             final_report.merge(report)
+
+    def add_owner(self, owner):
+        self.owners.append(owner)
+
+    def __eq__(self, other):
+        return self.repository_name == other.repository_name and self.owners == other.owners
+
+    def __ne__(self, other):
+        return not self == other
+
+
