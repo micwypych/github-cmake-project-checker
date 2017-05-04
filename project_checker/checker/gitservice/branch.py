@@ -24,7 +24,7 @@ class Branch:
 class LocalBranch(Branch):
     def checkout(self, commit=None):
         if commit is None:
-            return self.git_service.checkout_branch(self.name)
+            return self.git_service.checkout_branch(self)
         else:
             return self.git_service.checkout_commit(commit)
 
@@ -32,7 +32,7 @@ class LocalBranch(Branch):
         matches = re.match('\d{4}-\d{2}-\d{2} \d{2}:\d{2}', date)
         if not matches:
             raise RuntimeError('invalid date format')
-        return CommitId(self.git_service.command('rev-list', '-n', '1', '--before="' + date + '"', self.name).strip(' \t\n\r'))
+        return CommitId(self.git_service.command('rev-list', '-n', '1', '--before="' + date + '"', self.name, '--').strip(' \t\n\r'))
 
     def __str__(self):
         return 'local:' + self.name
@@ -58,3 +58,9 @@ class Branches:
 
     def remotes_without_local(self):
         return self.remote.difference(self.local)
+
+    def __len__(self):
+        return len(self.local)
+
+    def first_branch(self):
+        return list(self.local)[0]

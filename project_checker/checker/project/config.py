@@ -6,17 +6,23 @@ class ProjectOwners:
         self.parent_directory = parent_directory
         self.file_name = file_name
         self.projects = dict()
+        self.listed = False
 
     def list_student_projects(self):
-        for line in self.parent_directory.open(self.file_name):
-            project, owner1, owner2 = line.split(';')
-            project_name = project.strip(' \t\n\r\f')
-            p = StudentProject(project_name, self.parent_directory)
-            p.add_owner(owner1)
-            if owner2 != 'none':
-                p.add_owner(owner2)
+        if not self.listed:
+            for line in self.parent_directory.open(self.file_name, 'r'):
+                project, owner1, owner2 = line.split(';')
+                project_name = project.strip(' \t\n\r\f')
+                owner1_name = owner1.strip(' \t\n\r\f')
+                owner2_name = owner2.strip(' \t\n\r\f')
+                p = StudentProject(project_name, self.parent_directory)
+                if owner1_name != 'none':
+                    p.add_owner(owner1_name)
+                if owner2_name != 'none':
+                    p.add_owner(owner2_name)
 
-            self.projects[project_name] = p
+                self.projects[project_name] = p
+            self.listed = True
         return self.projects
 
     def __getitem__(self, item):
@@ -30,7 +36,7 @@ class Groups:
         self.students = dict()
 
     def list_students(self):
-        for line in self.parent_directory.open(self.file_name):
+        for line in self.parent_directory.open(self.file_name, 'r'):
             owner, g = line.split('\t')
             owner_id = owner.strip(' \t\n\r\f')
             g = g.strip(' \t\n\r\f')
@@ -49,7 +55,7 @@ class Deadlines:
         self.deadlines = dict()
 
     def list_deadlines(self):
-        for line in self.parent_directory.open(self.file_name):
+        for line in self.parent_directory.open(self.file_name, 'r'):
             lab, due = line.split('\t')
             lab_name = lab.strip(' \t\n\r\f')
             due_date = due.strip(' \t\n\r\f')
@@ -61,6 +67,18 @@ class Deadlines:
         return self.deadlines[item]
 
 
+class Homeworks:
+    def __init__(self, parent_directory, file_name):
+        self.parent_directory = parent_directory
+        self.file_name = file_name
+        self.tasks = []
+
+    def list(self):
+        for line in self.parent_directory.open(self.file_name, 'r'):
+            self.tasks.append(line.strip(' \t\n\r\f'))
+        return self.tasks
+
+
 class Config:
     def __init__(self, parent_directory):
         self.parent_directory = parent_directory
@@ -70,14 +88,44 @@ class Config:
         self.deadline5a_name = 'deadline_5a'
         self.groups_name = 'groups'
         self.repository_owners_name = 'repository_owners'
+        self.homework_name = 'homeworks'
 
-        self.deadlines = map()
+        self.deadlines = dict()
         self.deadlines['3b'] = Deadlines(self.parent_directory, self.deadline3b_name)
         self.deadlines['4a'] = Deadlines(self.parent_directory, self.deadline4a_name)
         self.deadlines['4b'] = Deadlines(self.parent_directory, self.deadline4b_name)
         self.deadlines['5a'] = Deadlines(self.parent_directory, self.deadline5a_name)
         self.groups = Groups(self.parent_directory, self.groups_name)
         self.repository_owners = ProjectOwners(self.parent_directory, self.repository_owners_name)
+        self.homework = Homeworks(self.parent_directory, self.homework_name)
 
+    def load(self):
+        self.groups.list_students()
+        self.repository_owners.list_student_projects()
+        for deadline in self.deadlines.values():
+            deadline.list_deadlines()
+        self.homework.list()
 
+    def student_projects(self):
+        return self.repository_owners.list_student_projects()
 
+    def deadlines_for_owners(self, owners):
+        if len(owners) == 0:
+            raise IndexError('no owners specified')
+        group1 = self.groups[owners[0]]
+        group = group1
+        if len(owners) == 2:
+            group2 = self.groups[owners[1]]
+            if (group1 != group2):
+                raise Exception('different groups')
+        return self.deadlines[group]
+
+    def homework(self):
+        return self.homework.list()
+
+    def save_homework_results_ranking(self, ranking):
+        f = self.parent_directory.open('results-ranking', 'w+')
+        for line in ranking:
+            f.write(line)
+            f.write('\n')
+        f.close()

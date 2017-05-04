@@ -15,7 +15,7 @@ class GitService(Service):
         return self.command('pull')
 
     def checkout_branch(self, branch):
-        return self.command('checkout', branch.name)
+        return self.command('checkout', branch.name, '--')
 
     def checkout_commit(self, commit):
         return self.command('checkout', commit.id(), '--')
@@ -57,5 +57,5 @@ class GitService(Service):
     def status(self):
         return self.command('status')
 
-    def exists(self):
-        return self.call('status') == 0
+    def exists(self, project_directory):
+        return self.call('status') == 0 or not project_directory.exists()

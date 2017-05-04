@@ -1,4 +1,5 @@
 import sys
+import traceback
 import subprocess
 import re
 from project_checker.checker.filesystem import Directory
@@ -6,6 +7,7 @@ from project_checker.checker.filesystem import Report
 from project_checker.checker.gitservice import GitService
 from project_checker.checker.buildservice import CMakeService
 from project_checker.checker.project import StudentProject
+from project_checker.checker.project import Config
 
 
 def new_main(args):
@@ -73,5 +75,32 @@ def process_single_project2(line, working_dir):
     project.check_lab_to_date(['lab1', 'lab2', 'lab3'], ['2017-03-15 23:59', '2017-03-22 23:59', '2017-03-29 23:59'])
     project.compile_final_report('report')
 
+
+def check_homework_from_config():
+    working_dir = Directory()
+    config = Config(working_dir)
+    config.load()
+    ranking = []
+
+    for project_name, project in config.student_projects().items():
+        try:
+            project.synchronize()
+            deadlines = config.deadlines_for_owners(project.owners)
+            project.check_lab_to_date(deadlines)
+            project.compile_final_report('report')
+            rank = project.to_result_raniking_lines('report', config.homework.list())
+            for owner in project.owners:
+                ranking.append(owner + ';' + rank)
+        except Exception as ex:
+            print('\n\nEXCEPTION'+project_name+'\n')
+            print(type(ex))
+            print(ex)
+            traceback.print_exc(file=sys.stdout)
+            print('\n\n')
+            continue
+    config.save_homework_results_ranking(ranking)
+
+
 if __name__ == "__main__":
-    new_main(sys.argv[1:])
+    # new_main(sys.argv[1:])
+    check_homework_from_config()

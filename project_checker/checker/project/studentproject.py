@@ -13,11 +13,13 @@ class GitProject:
         self.cmake = CMakeService(verbose=self.verbose)
 
     def synchronize(self, user_dir, repository):
-        self.project_dir.restore()
-        if not self.git.exists():
+        if not self.project_dir.exists():
             user_dir.restore()
             self.git.clone(repository)
-            self.project_dir.restore()
+        self.project_dir.restore()
+        self.branches = self.git.list_branches()
+        if len(self.branches) > 0:
+            self.branches.first_branch().checkout()
         self.git.pull()
         self.branches = self.git.list_branches()
         for branch in self.branches.remotes_without_local():
@@ -72,31 +74,35 @@ class StudentProject:
         if match is None:
             print(repository + ' does not match')
             raise RuntimeError('invalid repository: ' + repository + ' does not match')
-        user_dir_name = match.group(1)
-        print('PROJECT: '+user_dir_name)
+        self.user_dir_name = match.group(1)
         self.working_dir = parent_dir
-        self.user_dir = self.working_dir.create_dir(user_dir_name)
-        project_dir_name = match.group(2)
-        self.project_dir = self.user_dir.relative(project_dir_name)
-        self.git = GitProject(self.project_dir, verbose=True)
-        self.report_dir = self.project_dir.create_dir('report')
+        self.project_dir_name = match.group(2)
         self.repository_name = repository
         self.owners = []
+        self.project_dir = None
+        self.user_dir = None
+        self.report_dir = None
+        self.git = None
 
     def synchronize(self):
+        print('PROJECT: ' + self.user_dir_name)
+        self.user_dir = self.working_dir.create_dir(self.user_dir_name)
+        self.project_dir = self.user_dir.relative(self.project_dir_name)
+        self.git = GitProject(self.project_dir, verbose=True)
         self.git.synchronize(self.user_dir, self.repository_name)
+        self.report_dir = self.project_dir.create_dir('report')
 
-    def check_lab_to_date(self, labs, due_date):
-        for lab, date in zip(labs, due_date):
+    def check_lab_to_date(self, deadlines):
+        for lab, date in deadlines.deadlines.items():
             self.git.report_lab_tasks(self.report_dir, lab, date)
 
     def compile_final_report(self, name):
-        final_report = Report(self.report_dir, 'final-'+name)
+        final_report = Report(self.report_dir, 'final-' + name)
         all_reports = self.report_dir.all_partial_reports()
         self.merge_reports(all_reports, final_report)
         final_report.store()
         print(final_report.report)
-        final_report.only_passed_tests('final-passed-'+name).store()
+        final_report.only_passed_tests('final-passed-' + name).store()
 
         final_lab_report = Report(self.report_dir, 'final-lab' + name)
         lab_reports = filter(lambda r: r.name.startswith('report-lab'), all_reports)
@@ -113,10 +119,13 @@ class StudentProject:
     def add_owner(self, owner):
         self.owners.append(owner)
 
+    def to_result_raniking_lines(self, name, labs):
+        report = Report(self.report_dir, 'final-lab-' + name)
+        report.load()
+        return report.to_result_ranking(labs)
+
     def __eq__(self, other):
         return self.repository_name == other.repository_name and self.owners == other.owners
 
     def __ne__(self, other):
         return not self == other
-
-
