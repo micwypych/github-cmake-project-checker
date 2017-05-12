@@ -5,7 +5,8 @@ class ProjectOwners:
     def __init__(self, parent_directory, file_name):
         self.parent_directory = parent_directory
         self.file_name = file_name
-        self.projects = dict()
+        self.__projects = dict()
+        self.__declared_order = []
         self.listed = False
 
     def list_student_projects(self):
@@ -21,12 +22,13 @@ class ProjectOwners:
                 if owner2_name != 'none':
                     p.add_owner(owner2_name)
 
-                self.projects[project_name] = p
+                self.__declared_order.append(project_name)
+                self.__projects[project_name] = p
             self.listed = True
-        return self.projects
+        return list(map(lambda name: self[name], self.__declared_order))
 
     def __getitem__(self, item):
-        return self.projects[item]
+        return self.__projects[item]
 
 
 class Groups:
@@ -72,10 +74,15 @@ class Homeworks:
         self.parent_directory = parent_directory
         self.file_name = file_name
         self.tasks = []
+        self.listed = False
+
 
     def list(self):
+        if self.listed:
+            return self.tasks
         for line in self.parent_directory.open(self.file_name, 'r'):
             self.tasks.append(line.strip(' \t\n\r\f'))
+        self.listed = True
         return self.tasks
 
 
@@ -88,7 +95,7 @@ class Config:
         self.deadline5a_name = 'deadline_5a'
         self.groups_name = 'groups'
         self.repository_owners_name = 'repository_owners'
-        self.homework_name = 'homeworks'
+        self.homework_name = 'homework'
 
         self.deadlines = dict()
         self.deadlines['3b'] = Deadlines(self.parent_directory, self.deadline3b_name)
@@ -124,8 +131,9 @@ class Config:
         return self.homework.list()
 
     def save_homework_results_ranking(self, ranking):
-        f = self.parent_directory.open('results-ranking', 'w+')
+        f = self.parent_directory.open('results-ranking', 'w')
         for line in ranking:
             f.write(line)
             f.write('\n')
+        f.flush()
         f.close()

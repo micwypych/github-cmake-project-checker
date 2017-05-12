@@ -70,14 +70,14 @@ class GitProject:
 
 class StudentProject:
     def __init__(self, repository, parent_dir):
-        match = re.search('/([-\w]+)/([-\w]+)', repository)
+        match = re.search('/([^/]+)/([^/]+?)(\.git)?$', repository)
         if match is None:
             print(repository + ' does not match')
             raise RuntimeError('invalid repository: ' + repository + ' does not match')
         self.user_dir_name = match.group(1)
         self.working_dir = parent_dir
         self.project_dir_name = match.group(2)
-        self.repository_name = repository
+        self.repository_name = StudentProject.to_ssh(repository)
         self.owners = []
         self.project_dir = None
         self.user_dir = None
@@ -104,7 +104,7 @@ class StudentProject:
         print(final_report.report)
         final_report.only_passed_tests('final-passed-' + name).store()
 
-        final_lab_report = Report(self.report_dir, 'final-lab' + name)
+        final_lab_report = Report(self.report_dir, 'final-lab-' + name)
         lab_reports = filter(lambda r: r.name.startswith('report-lab'), all_reports)
         self.merge_reports(lab_reports, final_lab_report)
         final_lab_report.store()
@@ -129,3 +129,7 @@ class StudentProject:
 
     def __ne__(self, other):
         return not self == other
+
+    @classmethod
+    def to_ssh(cls, repository):
+        return re.sub('https://', 'ssh://git@', repository, flags=re.IGNORECASE)

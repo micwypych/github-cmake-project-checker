@@ -38,11 +38,12 @@ class Report:
         new_report.report = passed
         return new_report
 
-    def to_result_ranking(self, labs):
+    def to_result_ranking(self, labs, sep='\t'):
         common = set(labs).intersection(self.report.keys())
-        mapped = map(lambda l: self.report[l], common)
+        common_ordered = filter(lambda l: l in common, labs)
+        mapped = map(lambda l: self.report[l], common_ordered)
         results = map(lambda result: 'ok' if result == 0 else '0', mapped)
-        return ';'.join(results)
+        return sep.join(results)
 
     def __getitem__(self, item):
         return self.report[item]
@@ -51,7 +52,7 @@ class Report:
         self.report[key] = value
 
     def __str__(self):
-        return 'Report(\'' + str(self.report_dir) + str(self.name) + '\')'
+        return 'Report(\'' + str(self.report_dir) +'/'+ str(self.name) + '\')'
 
     __repr__ = __str__
 

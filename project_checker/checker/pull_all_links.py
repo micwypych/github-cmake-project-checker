@@ -2,6 +2,8 @@ import sys
 import traceback
 import subprocess
 import re
+from itertools import count
+
 from project_checker.checker.filesystem import Directory
 from project_checker.checker.filesystem import Report
 from project_checker.checker.gitservice import GitService
@@ -82,17 +84,18 @@ def check_homework_from_config():
     config.load()
     ranking = []
 
-    for project_name, project in config.student_projects().items():
+    for project in config.student_projects():
         try:
             project.synchronize()
-            deadlines = config.deadlines_for_owners(project.owners)
-            project.check_lab_to_date(deadlines)
+            # deadlines = config.deadlines_for_owners(project.owners)
+            # project.check_lab_to_date(deadlines)
             project.compile_final_report('report')
             rank = project.to_result_raniking_lines('report', config.homework.list())
+            pos = len(rank.split('\t'))
             for owner in project.owners:
-                ranking.append(owner + ';' + rank)
+                ranking.append(owner + '\t' + rank)
         except Exception as ex:
-            print('\n\nEXCEPTION'+project_name+'\n')
+            print('\n\nEXCEPTION in '+project.repository_name+'\n')
             print(type(ex))
             print(ex)
             traceback.print_exc(file=sys.stdout)
