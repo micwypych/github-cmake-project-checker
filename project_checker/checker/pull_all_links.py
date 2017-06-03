@@ -78,7 +78,7 @@ def process_single_project2(line, working_dir):
     project.compile_final_report('report')
 
 
-def check_homework_from_config():
+def check_homework_from_config(pull_new_version=True):
     working_dir = Directory()
     config = Config(working_dir)
     config.load()
@@ -87,8 +87,9 @@ def check_homework_from_config():
     for project in config.student_projects():
         try:
             project.synchronize()
-            # deadlines = config.deadlines_for_owners(project.owners)
-            # project.check_lab_to_date(deadlines)
+            if pull_new_version:
+                deadlines = config.deadlines_for_owners(project.owners)
+                project.check_lab_to_date(deadlines)
             project.compile_final_report('report')
             rank = project.to_result_raniking_lines('report', config.homework.list())
             pos = len(rank.split('\t'))
@@ -106,4 +107,4 @@ def check_homework_from_config():
 
 if __name__ == "__main__":
     # new_main(sys.argv[1:])
-    check_homework_from_config()
+    check_homework_from_config(pull_new_version=True)

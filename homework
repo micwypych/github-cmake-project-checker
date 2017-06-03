@@ -32,3 +32,12 @@ lab8_sub_rip_error_cases_tests
 lab9_base_serializer_tests
 lab9_json_serializer_tests
 lab9_xml_serializer_tests
+lab10_schedule_tests
+lab10_scheduler_tests
+lab12_sequential_generator_tests
+lab12_teacher_hash_tests
+lab12_time_recorder_tests
+lab12_tree_preorder_tests
+lab12_tree_inorder_tests
+lab12_tree_postorder_tests
+
