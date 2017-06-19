@@ -38,6 +38,24 @@ class ProjectOwnersTest(TestCase):
         self.assertEqual(self.projects(dir_service),
                          d.list_student_projects())
 
+    def test_after_exculsion_all_projects_with_owner_are_present(self):
+        dir_service = MagicMock(open=lambda *args: ['https://github.com/owner/repo-2.git;111111;222222',
+                                                    'https://github.com/another-owner/repo-2.git;313131;111112',
+                                                    'https://github.com/owner2/repo-2.git;891929;none'])
+        d = ProjectOwners(dir_service, 'whatever')
+        d.exclude_other_projects_than(['owner'])
+
+        self.assertEqual(self.projects(dir_service),d.list_student_projects())
+
+    def test_after_exculsion_projects_with_another_only_one_project_is_left(self):
+        dir_service = MagicMock(open=lambda *args: ['https://github.com/owner/repo-2.git;111111;222222',
+                                                    'https://github.com/another-owner/repo-2.git;313131;111112',
+                                                    'https://github.com/owner2/repo-2.git;891929;none'])
+        d = ProjectOwners(dir_service, 'whatever')
+        d.exclude_other_projects_than(['another'])
+
+        self.assertListEqual([self.projects(dir_service)[1]], d.list_student_projects())
+
     @staticmethod
     def projects(d):
         r1 = 'https://github.com/owner/repo-2.git'
@@ -49,6 +67,7 @@ class ProjectOwnersTest(TestCase):
         p2 = StudentProject(r2, d)
         p2.add_owner('313131')
         p2.add_owner('111112')
+
         r3 = 'https://github.com/owner2/repo-2.git'
         p3 = StudentProject(r3, d)
         p3.add_owner('891929')

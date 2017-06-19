@@ -1,4 +1,12 @@
+import re
 from project_checker.checker.project import StudentProject
+
+
+def matches_one_of(key, list_of_patterns):
+    for pattern in list_of_patterns:
+        if re.search(pattern, key) is not None:
+            return True
+    return False
 
 
 class ProjectOwners:
@@ -26,6 +34,16 @@ class ProjectOwners:
                 self.__projects[project_name] = p
             self.listed = True
         return list(map(lambda name: self[name], self.__declared_order))
+
+    def exclude_other_projects_than(self, list_of_patterns):
+        self.list_student_projects()
+        after_exclusion = {}
+        for k, v in self.__projects.items():
+            if matches_one_of(k, list_of_patterns):
+                after_exclusion[k] = v
+            else:
+                self.__declared_order.remove(k)
+        self.__projects = after_exclusion
 
     def __getitem__(self, item):
         return self.__projects[item]
@@ -75,7 +93,6 @@ class Homeworks:
         self.file_name = file_name
         self.tasks = []
         self.listed = False
-
 
     def list(self):
         if self.listed:

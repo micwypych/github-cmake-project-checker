@@ -84,6 +84,13 @@ def check_all_homework(pull_new_version=True):
     config.load()
     check_homework_by_configuration(config, pull_new_version)
 
+def check_homework_of_owners(included=[], pull_new_version=True):
+    working_dir = Directory()
+    config = Config(working_dir)
+    config.load()
+    config.repository_owners.exclude_other_projects_than(included)
+    check_homework_by_configuration(config, pull_new_version)
+
 
 def check_homework_by_configuration(config, pull_new_version):
     ranking = []
