@@ -78,12 +78,15 @@ def process_single_project2(line, working_dir):
     project.compile_final_report('report')
 
 
-def check_homework_from_config(pull_new_version=True):
+def check_all_homework(pull_new_version=True):
     working_dir = Directory()
     config = Config(working_dir)
     config.load()
-    ranking = []
+    check_homework_by_configuration(config, pull_new_version)
 
+
+def check_homework_by_configuration(config, pull_new_version):
+    ranking = []
     for project in config.student_projects():
         try:
             project.synchronize()
@@ -96,7 +99,7 @@ def check_homework_from_config(pull_new_version=True):
             for owner in project.owners:
                 ranking.append(owner + '\t' + rank)
         except Exception as ex:
-            print('\n\nEXCEPTION in '+project.repository_name+'\n')
+            print('\n\nEXCEPTION in ' + project.repository_name + '\n')
             print(type(ex))
             print(ex)
             traceback.print_exc(file=sys.stdout)
@@ -107,4 +110,4 @@ def check_homework_from_config(pull_new_version=True):
 
 if __name__ == "__main__":
     # new_main(sys.argv[1:])
-    check_homework_from_config(pull_new_version=True)
+    check_all_homework(pull_new_version=True)
