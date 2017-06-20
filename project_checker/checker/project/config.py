@@ -102,6 +102,15 @@ class Homeworks:
         self.listed = True
         return self.tasks
 
+    def exclude_other_homework_than(self, homeworks):
+        self.list()
+        filtered = []
+        for t in self.tasks:
+            if matches_one_of(t, homeworks):
+                filtered.append(t)
+        self.tasks = filtered
+
+
 
 class Config:
     def __init__(self, parent_directory):

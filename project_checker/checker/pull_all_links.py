@@ -79,15 +79,19 @@ def process_single_project2(line, working_dir):
 
 
 def check_all_homework(pull_new_version=True):
-    working_dir = Directory()
-    config = Config(working_dir)
-    config.load()
+    config = make_default_config()
     check_homework_by_configuration(config, pull_new_version)
 
-def check_homework_of_owners(included=[], pull_new_version=True):
+
+def make_default_config():
     working_dir = Directory()
     config = Config(working_dir)
     config.load()
+    return config
+
+
+def check_homework_of_owners(included=[], pull_new_version=True):
+    config = make_default_config()
     config.repository_owners.exclude_other_projects_than(included)
     check_homework_by_configuration(config, pull_new_version)
 
@@ -96,7 +100,7 @@ def check_homework_by_configuration(config, pull_new_version):
     ranking = []
     for project in config.student_projects():
         try:
-            project.synchronize()
+            project.synchronize(pull_new_version)
             if pull_new_version:
                 deadlines = config.deadlines_for_owners(project.owners)
                 project.check_lab_to_date(deadlines)

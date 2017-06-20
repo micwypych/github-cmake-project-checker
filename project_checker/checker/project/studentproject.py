@@ -12,7 +12,7 @@ class GitProject:
         self.branches = set()
         self.cmake = CMakeService(verbose=self.verbose)
 
-    def synchronize(self, user_dir, repository):
+    def synchronize(self, user_dir, repository, pull_new_version):
         if not self.project_dir.exists():
             user_dir.restore()
             self.git.clone(repository)
@@ -20,11 +20,12 @@ class GitProject:
         self.branches = self.git.list_branches()
         if len(self.branches) > 0:
             self.branches.first_branch().checkout()
-        self.git.pull()
-        self.branches = self.git.list_branches()
-        for branch in self.branches.remotes_without_local():
-            branch.checkout()
-        self.branches = self.git.list_branches()
+        if pull_new_version:
+            self.git.pull()
+            self.branches = self.git.list_branches()
+            for branch in self.branches.remotes_without_local():
+                branch.checkout()
+            self.branches = self.git.list_branches()
 
     def report_all_tasks(self, report_dir):
         for branch in self.branches.local:
@@ -84,12 +85,12 @@ class StudentProject:
         self.report_dir = None
         self.git = None
 
-    def synchronize(self):
+    def synchronize(self, pull_new_version):
         print('PROJECT: ' + self.user_dir_name)
         self.user_dir = self.working_dir.create_dir(self.user_dir_name)
         self.project_dir = self.user_dir.relative(self.project_dir_name)
         self.git = GitProject(self.project_dir, verbose=True)
-        self.git.synchronize(self.user_dir, self.repository_name)
+        self.git.synchronize(self.user_dir, self.repository_name, pull_new_version)
         self.report_dir = self.project_dir.create_dir('report')
 
     def check_lab_to_date(self, deadlines):
