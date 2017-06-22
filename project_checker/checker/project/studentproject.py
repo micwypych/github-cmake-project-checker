@@ -29,13 +29,13 @@ class GitProject:
 
     def report_all_tasks(self, report_dir):
         for branch in self.branches.local:
-            report = Report(report_dir, 'report-' + branch.name)
+            report = Report(report_dir, 'report-' + branch.escaped_name())
             self.__report_all_tasks_from_single_branch(branch, report)
             report.store()
 
     def report_lab_tasks(self, report_dir, lab, date):
         for branch in self.branches.local:
-            report = Report(report_dir, 'report-' + lab + '-' + branch.name)
+            report = Report(report_dir, 'report-' + lab + '-' + branch.escaped_name())
             self.__report_lab_tasks_from_single_branch(branch, report, lab, date)
             report.store()
 
@@ -66,7 +66,8 @@ class GitProject:
 
     @staticmethod
     def branch_build_dir_name(branch):
-        return 'build-' + branch.name
+        name = branch.escaped_name()
+        return 'build-' + name
 
 
 class StudentProject:

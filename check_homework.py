@@ -2,9 +2,6 @@ from argparse import ArgumentParser
 from project_checker.checker.pull_all_links import make_default_config
 from project_checker.checker.pull_all_links import check_homework_by_configuration
 
-def split():
-    pass
-
 def make_program_arg_parser():
     parser = ArgumentParser(prog='check homework')
     parser.add_argument('-r', '--only-repositories', dest='repos', type=str, default='',
@@ -36,7 +33,6 @@ def main_args(args):
     else:
         print('old version of pull')
     check_homework_by_configuration(config, pull_new_version=args.pull)
-
 
 def main():
     parser = make_program_arg_parser()

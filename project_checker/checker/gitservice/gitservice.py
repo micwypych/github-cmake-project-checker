@@ -12,10 +12,10 @@ class GitService(Service):
         return self.command('status')
 
     def pull(self):
-        return self.command('pull')
+        return self.call('pull')
 
     def checkout_branch(self, branch):
-        return self.command('checkout', branch.name, '--')
+        return self.command('checkout', branch.checkout_name(), '--')
 
     def checkout_commit(self, commit):
         return self.command('checkout', commit.id(), '--')
@@ -26,7 +26,9 @@ class GitService(Service):
     def list_branches(self):
         def local_matcher(line):
             stripped = line.strip(' \t\n\r')
-            return re.match(r'^(\*\s)?([^\*/\s]+)$', stripped)
+            if stripped.startswith('remotes/origin/'):
+                return None
+            return re.match(r'^(\*\s)?([^\*\s]+)$', stripped)
 
         def remote_matcher(line):
             stripped = line.strip(' \t\n\r')

@@ -11,14 +11,20 @@ class CommitId:
 
 class Branch:
     def __init__(self, name, git_service):
-        self.name = name
+        self.__name = name
         self.git_service = git_service
 
     def __hash__(self):
-        return hash(self.name)
+        return hash(self.__name)
 
     def __eq__(self, other):
-        return self.name == other.name
+        return self.__name == other.__name
+
+    def escaped_name(self):
+        return re.sub('/', '_', self.__name)
+
+    def checkout_name(self):
+        return self.__name
 
 
 class LocalBranch(Branch):
@@ -32,20 +38,22 @@ class LocalBranch(Branch):
         matches = re.match('\d{4}-\d{2}-\d{2} \d{2}:\d{2}', date)
         if not matches:
             raise RuntimeError('invalid date format')
-        return CommitId(self.git_service.command('rev-list', '-n', '1', '--before="' + date + '"', self.name, '--').strip(' \t\n\r'))
+        return CommitId(
+            self.git_service.command('rev-list', '-n', '1', '--before="' + date + '"', self.checkout_name(), '--').strip(
+                ' \t\n\r'))
 
     def __str__(self):
-        return 'local:' + self.name
+        return 'local:' + self.cechkout_name()
 
     __repr__ = __str__
 
 
 class RemoteBranch(Branch):
     def checkout(self):
-        return self.git_service.command('checkout', '-b', self.name, 'origin/' + self.name)
+        return self.git_service.command('checkout', '-b', self.checkout_name(), 'origin/' + self.checkout_name())
 
     def __str__(self):
-        return 'remote:' + self.name
+        return 'remote:' + self.cechkout_name()
 
     __repr__ = __str__
 
