@@ -19,7 +19,10 @@ class ProjectOwners:
 
     def list_student_projects(self):
         if not self.listed:
-            for line in self.parent_directory.open(self.file_name, 'r'):
+            for n_line,line in enumerate(self.parent_directory.open(self.file_name, 'r')):
+                if ';' not in line:
+                  print("{0} skpping invalid line({1}): {2}".format(self.file_name, n_line, line))
+                  continue
                 project, owner1, owner2 = line.split(';')
                 project_name = project.strip(' \t\n\r\f')
                 owner1_name = owner1.strip(' \t\n\r\f')
@@ -115,6 +118,9 @@ class Homeworks:
 class Config:
     def __init__(self, parent_directory):
         self.parent_directory = parent_directory
+        self.deadline_pattern = re.compile('deadline_(\d[ab])')
+        self.deadline_filenames = self.parent_directory.all_deadlines_by_pattern(self.deadline_pattern)
+        print("loading deadlines files: {0}".format(self.deadline_filenames))
         self.deadline3b_name = 'deadline_3b'
         self.deadline4a_name = 'deadline_4a'
         self.deadline4b_name = 'deadline_4b'
@@ -124,10 +130,10 @@ class Config:
         self.homework_name = 'homework'
 
         self.deadlines = dict()
-        self.deadlines['3b'] = Deadlines(self.parent_directory, self.deadline3b_name)
-        self.deadlines['4a'] = Deadlines(self.parent_directory, self.deadline4a_name)
-        self.deadlines['4b'] = Deadlines(self.parent_directory, self.deadline4b_name)
-        self.deadlines['5a'] = Deadlines(self.parent_directory, self.deadline5a_name)
+        for filename in self.deadline_filenames:
+          group_name = str(self.deadline_pattern.match(filename).group(1))
+          deadline = Deadlines(self.parent_directory, filename)
+          self.deadlines[group_name] = deadline
         self.groups = Groups(self.parent_directory, self.groups_name)
         self.repository_owners = ProjectOwners(self.parent_directory, self.repository_owners_name)
         self.homework = Homeworks(self.parent_directory, self.homework_name)

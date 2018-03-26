@@ -1,4 +1,5 @@
 import os
+import re
 from project_checker.checker.filesystem.report import Report
 
 
@@ -40,6 +41,12 @@ class Directory:
         else:
             p = os.path.join(self.working_dir, name)
             return open(p, options)
+
+    def all_deadlines_by_pattern(self,pattern_str):
+        pattern = re.compile(pattern_str)
+        reports = os.listdir(self.working_dir)
+        filtered = filter(lambda s: pattern.match(s), reports)
+        return list(filtered)
 
     def all_partial_reports(self):
         reports = os.listdir(self.working_dir)
