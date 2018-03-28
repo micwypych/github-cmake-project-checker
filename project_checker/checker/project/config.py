@@ -47,6 +47,7 @@ class ProjectOwners:
             else:
                 self.__declared_order.remove(k)
         self.__projects = after_exclusion
+        print("projects to check after exclusion[{0}]: {1}".format(self.file_name, self.__projects))
 
     def __getitem__(self, item):
         return self.__projects[item]
@@ -83,7 +84,7 @@ class Deadlines:
             lab_name = lab.strip(' \t\n\r\f')
             due_date = due.strip(' \t\n\r\f')
             self.deadlines[lab_name] = due_date
-
+        print("loaded deadlines[{0}]: {1}".format(self.file_name, self.deadlines))
         return self.deadlines
 
     def __getitem__(self, item):
@@ -99,6 +100,7 @@ class Homeworks:
 
     def list(self):
         if self.listed:
+            print("listing tasks[{0}]: {1}".format(self.file_name, self.tasks))
             return self.tasks
         for line in self.parent_directory.open(self.file_name, 'r'):
             self.tasks.append(line.strip(' \t\n\r\f'))
@@ -112,6 +114,7 @@ class Homeworks:
             if matches_one_of(t, homeworks):
                 filtered.append(t)
         self.tasks = filtered
+        print("tasks to check after exclusion[{0}]: {1}".format(self.file_name, self.tasks))
 
 
 
