@@ -3,6 +3,9 @@ import re
 
 class CommitId:
     def __init__(self, name):
+        matches = re.match('[0-9a-fA-F]+', name)
+        if not matches:
+            raise RuntimeError('invalid commit id: '+name)
         self.name = name
 
     def id(self):
@@ -43,7 +46,7 @@ class LocalBranch(Branch):
                 ' \t\n\r'))
 
     def __str__(self):
-        return 'local:' + self.cechkout_name()
+        return 'local:' + self.checkout_name()
 
     __repr__ = __str__
 
@@ -53,7 +56,7 @@ class RemoteBranch(Branch):
         return self.git_service.command('checkout', '-b', self.checkout_name(), 'origin/' + self.checkout_name())
 
     def __str__(self):
-        return 'remote:' + self.cechkout_name()
+        return 'remote:' + self.checkout_name()
 
     __repr__ = __str__
 

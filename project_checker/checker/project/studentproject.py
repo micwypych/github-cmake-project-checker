@@ -47,12 +47,15 @@ class GitProject:
         self.report_targets(report, test_targets)
 
     def __report_lab_tasks_from_single_branch(self, branch, report, lab, date):
-        self.project_dir.restore()
-        commit = branch.find_commit_before(date)
-        branch.checkout(commit)
-        self.__build_branch(branch)
-        test_targets = self.cmake.test_targets_without_compound_all_of_lab(lab)
-        self.report_targets(report, test_targets)
+        try:
+          self.project_dir.restore()
+          commit = branch.find_commit_before(date)
+          branch.checkout(commit)
+          self.__build_branch(branch)
+          test_targets = self.cmake.test_targets_without_compound_all_of_lab(lab)
+          self.report_targets(report, test_targets)
+        except RuntimeError as error:
+          print('Unable to report lab '+str(lab)+':'+str(date)+' (branch: '+str(branch)+'): '+str(error))
 
     def __build_branch(self, branch):
         build_dir = self.project_dir.create_dir(self.branch_build_dir_name(branch))
